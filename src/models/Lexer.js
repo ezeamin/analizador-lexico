@@ -1,18 +1,20 @@
+import { Token } from './Token.js';
+
 export class Lexer {
   constructor(input) {
     this.input = input;
     this.position = 0;
   }
 
-  isWhiteSpace(char) {
+  static isWhiteSpace(char) {
     return /\s/.test(char);
   }
 
-  isAlpha(char) {
+  static isAlpha(char) {
     return /[a-zA-Z_]/.test(char);
   }
 
-  isDigit(char) {
+  static isDigit(char) {
     return /\d/.test(char);
   }
 
@@ -21,7 +23,7 @@ export class Lexer {
       let char = this.input[this.position];
 
       if (this.isWhiteSpace(char)) {
-        this.position++;
+        this.position += 1;
         continue;
       }
 
@@ -29,7 +31,7 @@ export class Lexer {
         let identifier = '';
         while (this.isAlpha(char) || this.isDigit(char)) {
           identifier += char;
-          this.position++;
+          this.position += 1;
           char = this.input[this.position];
         }
         return new Token('IDENTIFIER', identifier);
@@ -39,7 +41,7 @@ export class Lexer {
         let number = '';
         while (this.isDigit(char)) {
           number += char;
-          this.position++;
+          this.position += 1;
           char = this.input[this.position];
         }
         return new Token('NUMBER', parseInt(number));
@@ -47,22 +49,22 @@ export class Lexer {
 
       switch (char) {
         case '=':
-          this.position++;
+          this.position += 1;
           return new Token('ASSIGN', '=');
         case '+':
-          this.position++;
+          this.position += 1;
           return new Token('PLUS', '+');
         case '-':
-          this.position++;
+          this.position += 1;
           return new Token('MINUS', '-');
         case '*':
-          this.position++;
+          this.position += 1;
           return new Token('MULTIPLY', '*');
         case '/':
-          this.position++;
+          this.position += 1;
           return new Token('DIVIDE', '/');
         case ';':
-          this.position++;
+          this.position += 1;
           return new Token('SEMICOLON', ';');
         default:
           throw new Error(`Invalid character: ${char}`);

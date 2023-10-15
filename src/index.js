@@ -1,4 +1,4 @@
-import { Lexer } from './models/Lexer';
+import { Lexer } from './models/Lexer.js';
 
 const sourceCode = 'int x = 42; y = x + 10;';
 
