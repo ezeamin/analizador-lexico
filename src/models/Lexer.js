@@ -6,15 +6,15 @@ export class Lexer {
     this.position = 0;
   }
 
-  static isWhiteSpace(char) {
+  isWhiteSpace(char) {
     return /\s/.test(char);
   }
 
-  static isAlpha(char) {
+  isAlpha(char) {
     return /[a-zA-Z_]/.test(char);
   }
 
-  static isDigit(char) {
+  isDigit(char) {
     return /\d/.test(char);
   }
 
@@ -44,7 +44,7 @@ export class Lexer {
           this.position += 1;
           char = this.input[this.position];
         }
-        return new Token('NUMBER', parseInt(number));
+        return new Token('NUMBER', parseInt(number, 10));
       }
 
       switch (char) {
