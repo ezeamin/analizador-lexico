@@ -1,13 +1,24 @@
-import { Lexer } from './models/Lexer.js';
+import express from 'express';
+import morgan from 'morgan';
+import cors from 'cors';
 
-const sourceCode = 'int x = 42; y = x + 10; float z = 5.2; if (x != 10) { y = 0; }';
+import router from './routes/routes.js';
 
-console.log(`Source code: ${sourceCode}\n`);
+// 1- Inicializamos express
+const app = express();
 
-const lexer = new Lexer(sourceCode);
+// 2- Configuraciones del servidor
+const PORT = process.env.PORT || 5000;
 
-let token = lexer.getNextToken();
-while (token.type !== 'EOF') {
-  console.log(token);
-  token = lexer.getNextToken();
-}
+// 3- Middlewares
+app.use(morgan('dev'));
+app.use(cors());
+app.use(express.json()); // <==== Parsear el body como JSON
+
+// 4- Rutas
+app.use('/api/v1', router);
+
+// 5- Loop del servidor
+app.listen(PORT, () => {
+  console.log(`Servidor ejecutandose en puerto ${PORT}`);
+});

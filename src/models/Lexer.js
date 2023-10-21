@@ -23,7 +23,7 @@ export class Lexer {
       if (Analyzer.isAlpha(char)) {
         let identifier = '';
 
-        while (Analyzer.isAlpha(char) || Analyzer.isDigit(char)) {
+        while (char && (Analyzer.isAlpha(char) || Analyzer.isDigit(char))) {
           identifier += char;
           this.position += 1;
           char = this.input.at(this.position);
@@ -35,14 +35,14 @@ export class Lexer {
           return new Token(keyword, identifier);
         }
 
-        return new Token('IDENTIFIER', identifier);
+        return new Token('Identificador', identifier);
       }
 
       // Numbers
       if (Analyzer.isDigit(char)) {
         let number = '';
 
-        while (Analyzer.isDigit(char)) {
+        while (char && Analyzer.isDigit(char)) {
           number += char;
           this.position += 1;
           char = this.input.at(this.position);
@@ -56,7 +56,7 @@ export class Lexer {
 
           // Check for ".(something_not_a_number)"
           if (!Analyzer.isDigit(char)) {
-            throw new Error(`Invalid character: ${char}`);
+            throw new Error(`Caracter inválido: ${char}`);
           }
 
           while (Analyzer.isDigit(char)) {
@@ -66,7 +66,7 @@ export class Lexer {
           }
         }
 
-        return new Token('NUMBER', Number(number));
+        return new Token('Número', Number(number));
       }
 
       // Symbols
@@ -74,16 +74,7 @@ export class Lexer {
       const value = char;
 
       if (!name) {
-        throw new Error(`Invalid character: ${char}`);
-      }
-
-      // Check for bigger symbols (>=, <=, ==, !=)
-      const nextChar = this.input.at(this.position + 1);
-      const biggerSymbol = dictionary.symbols[char + nextChar];
-
-      if (biggerSymbol) {
-        this.position += 2;
-        return new Token(biggerSymbol, char + nextChar);
+        throw new Error(`Caracter inválido: ${char}`);
       }
 
       this.position += 1;
