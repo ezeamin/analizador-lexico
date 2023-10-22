@@ -3,6 +3,10 @@ export class Analyzer {
     return /\s/.test(char);
   }
 
+  static isNewLine(char) {
+    return /\n/.test(char);
+  }
+
   static isAlpha(char) {
     return /[a-zA-Z_]/.test(char);
   }
