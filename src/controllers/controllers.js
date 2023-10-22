@@ -23,7 +23,7 @@ export const postAnalyze = async (req, res) => {
       // Only for highlighting purposes
       if (token.type === 'SPACE') highlightedText += '&nbsp;';
       else {
-        highlightedText += `<span class="highlighted-token" title="${token.color}">${token.value}</span>`;
+        highlightedText += `<span class="highlighted-token color-${token.color}" title="Token: ${token.type}">${token.value}</span>`;
       }
 
       if (token.type === 'NEW_LINE') highlightedText += '<br />';
