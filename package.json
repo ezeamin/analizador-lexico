@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "build": "esbuild src/index.js --bundle --platform=node --outfile=dist/index.cjs --minify",
-    "start": "node dist/index.cjs"
+    "start": "node dist/index.cjs",
+    "generate-grammar": "peggy -o ./src/grammar.js --format=es ./grammar.pegjs"
   },
   "devDependencies": {
     "esbuild": "^0.19.5",

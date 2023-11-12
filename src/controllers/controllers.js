@@ -2,6 +2,13 @@ import table from '../dictionary.js';
 
 import { Lexer } from '../models/Lexer.js';
 
+import { parse } from '../grammar.js';
+import { generateTree } from '../utilities/generateTree.js';
+
+// ---------------------------------------
+// POST
+// ---------------------------------------
+
 export const postAnalyze = async (req, res) => {
   const {
     body: { text },
@@ -31,11 +38,51 @@ export const postAnalyze = async (req, res) => {
       token = lexer.getNextToken();
     }
   } catch (error) {
+    console.log('input:', text);
+    console.error(error);
+
     return res.status(400).json({ error: error.message });
   }
 
   return res.json({ data: result, text: highlightedText });
 };
+
+export const postSyntaxAnalyze = async (req, res) => {
+  const {
+    body: { text },
+  } = req;
+
+  // TODO: Add symbols analysis here
+
+  try {
+    const data = parse(text);
+    const treeData = generateTree(data);
+
+    // TODO: Error handling?
+
+    res.json({ tree: treeData, raw: data });
+  } catch (e) {
+    // How many errors at the same time?
+    console.log('input:', text);
+    console.error(e);
+
+    // TODO: Improve "found" to include whole word (regex?)
+    if (e.expected) {
+      res.status(400).json({
+        error: `Se esperaba "${e.expected[0].text}" pero se encontró "${e.found}" en la linea ${e.location.start.line} columna ${e.location.start.column}`,
+      });
+      return;
+    }
+
+    res.status(500).json({
+      error: e.message,
+    });
+  }
+};
+
+// ---------------------------------------
+// GET
+// ---------------------------------------
 
 export const getTable = async (_, res) => {
   const originalObj = {
