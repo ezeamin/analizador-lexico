@@ -35,12 +35,29 @@ statement
   / input
   / output
   / assignment
+  / whileStatement
+  / ifStatement
+  
+whileStatement
+  = _ "mientras" _ "(" _ condition:expression _ ")" _ "{" _ body:statement* _ "}"
+    { return { type: "WhileStatement", condition: condition, body: body }; }
+    
+ifStatement
+  = _ "si" _ "(" _ condition:expression _ ")" _ "{" _ body:statement* _ "}" elseStmt:elseStatement?
+    { return { type: "IfStatement", condition, body: body, else: elseStmt || [] }; }
+    
+elseStatement
+  = _ "sino" _ "{" _ body:statement* _ "}" {
+    { return body; }
+  }
 
 declaration
-  = "int" _ vars:variableDeclarationList ";" {
+  = _ varType:type _ vars:variableDeclarationList ";" {
+     const variables = vars.map((variable)=>({...variable, varType}))
+  
       return {
         type: "Declaration",
-        variables: vars,
+        variables: variables,
       };
     }
 
@@ -80,9 +97,40 @@ assignment
     }
 
 expression
-  = left:primary _ op:operator _ right:primary {
-      return createBinaryOperation(left, op, right);
-    } / primary
+  = left:logicalExpression _ otherTerms:(_ op:bitwiseOperator _ right:logicalExpression {
+      return { left, operator: op, right };
+    })* {
+      return otherTerms.reduce(function (acc, term) {
+        return createBinaryOperation(acc, term.operator, term.right);
+      }, left);
+    }
+
+logicalExpression
+  = left:bitwiseExpression _ otherTerms:(_ op:logicalOperator _ right:bitwiseExpression {
+      return { left, operator: op, right };
+    })* {
+      return otherTerms.reduce(function (acc, term) {
+        return createBinaryOperation(acc, term.operator, term.right);
+      }, left);
+    }
+
+bitwiseExpression
+  = left:arithmeticExpression _ otherTerms:(_ op:bitwiseOperator _ right:arithmeticExpression {
+      return { left, operator: op, right };
+    })* {
+      return otherTerms.reduce(function (acc, term) {
+        return createBinaryOperation(acc, term.operator, term.right);
+      }, left);
+    }
+
+arithmeticExpression
+  = left:primary _ otherTerms:(_ op:arithmeticOperator _ right:primary {
+      return { left, operator: op, right };
+    })* {
+      return otherTerms.reduce(function (acc, term) {
+        return createBinaryOperation(acc, term.operator, term.right);
+      }, left);
+    }
 
 primary
   = integer
@@ -91,9 +139,18 @@ primary
   / "(" _ expr:expression _ ")" {
       return expr;
     }
-    
-operator
+
+bitwiseOperator
+  = "&" / "|"
+
+logicalOperator
+  = "&&" / "||"
+
+arithmeticOperator
   = "+" / "*" / "-" / "/"
+  
+type
+  = "int" / "float" / "char"
   
 integer
   = digits:[0-9]+ { return { type: "Integer", value: parseInt(digits.join(''), 10) }; }
@@ -102,7 +159,7 @@ string
   = "\"" value:$([^"]*) "\"" { return { type: "String", value: value }; }
 
 identifier
-  = name:$(letter (letter / digit)*) {
+  = name:$(letter (letter / digit / "_")*) !"int" {
       return { type: "Identifier", name: name };
     }
 

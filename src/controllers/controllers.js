@@ -69,7 +69,7 @@ export const postSyntaxAnalyze = async (req, res) => {
       const expected = expectedElements.map((el) => el.text).join('", "');
       const line = e.location.start.line;
       const column = e.location.start.column;
-      const found = text.split('\n')[line - 1][column - 1];
+      const found = e.found;
 
       res.status(400).json({
         error: `(${line}:${column}) Se esperaba "${expected}" pero se encontró "${found}"`,
