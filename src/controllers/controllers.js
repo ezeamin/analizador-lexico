@@ -58,18 +58,21 @@ export const postSyntaxAnalyze = async (req, res) => {
     const data = parse(text);
     const treeData = generateTree(data);
 
-    // TODO: Error handling?
-
     res.json({ tree: treeData, raw: data });
   } catch (e) {
-    // How many errors at the same time?
     console.log('input:', text);
     console.error(e);
 
     // TODO: Improve "found" to include whole word (regex?)
     if (e.expected) {
+      const expectedElements = e.expected.filter((el) => el.type === 'literal');
+      const expected = expectedElements.map((el) => el.text).join('", "');
+      const line = e.location.start.line;
+      const column = e.location.start.column;
+      const found = text.split('\n')[line - 1][column - 1];
+
       res.status(400).json({
-        error: `Se esperaba "${e.expected[0].text}" pero se encontró "${e.found}" en la linea ${e.location.start.line} columna ${e.location.start.column}`,
+        error: `(${line}:${column}) Se esperaba "${expected}" pero se encontró "${found}"`,
       });
       return;
     }

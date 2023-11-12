@@ -10,7 +10,7 @@
 }
 
 start
-  = "programa" _ name:identifier "(" _ params:paramList _ ")" _ "{" _ stmts:statement* _ finish:finishStatement _ "}" _ {
+  = "programa" _ name:identifier "(" _ params:paramList* _ ")" _ "{" _ stmts:statement* _ finish:finishStatement _ "}" _ {
       return {
         type: "Program",
         name: name,
@@ -21,9 +21,8 @@ start
     }
 
 paramList
-  = param:identifier* ("," otherParams:identifier)* {
-      // return [param].concat(otherParams);
-      return [param];
+  = param:identifier otherParams:("," _ id:identifier { return id; })* {
+      return [param].concat(otherParams);
     }
 
 finishStatement
@@ -46,9 +45,8 @@ declaration
     }
 
 variableDeclarationList
-  = variable:identifier (_ "," _ otherVars:identifier)* {
-      // return [variable].concat(otherVars);
-      return [variable];
+  = variable:identifier otherVars:("," _ id:identifier { return id; })* {
+      return [variable].concat(otherVars);
     }
 
 input
@@ -68,9 +66,8 @@ output
     }
 
 printParameters
-  = param:expression (_ "," _ otherParams:expression)* {
-      // return [param].concat(otherParams);
-      return [param];
+  = param:expression otherParams:("," _ id:expression { return id; })* {
+      return [param].concat(otherParams);
     }
 
 assignment
@@ -83,19 +80,9 @@ assignment
     }
 
 expression
-  = additive
-
-additive
-  = left:multiplicative _ "+" _ right:additive {
-      return createBinaryOperation(left, "+", right);
-    }
-  / multiplicative
-
-multiplicative
-  = left:primary "*" _ right:multiplicative {
-      return createBinaryOperation(left, "*", right);
-    }
-  / primary
+  = left:primary _ op:operator _ right:primary {
+      return createBinaryOperation(left, op, right);
+    } / primary
 
 primary
   = integer
@@ -104,7 +91,10 @@ primary
   / "(" _ expr:expression _ ")" {
       return expr;
     }
-
+    
+operator
+  = "+" / "*" / "-" / "/"
+  
 integer
   = digits:[0-9]+ { return { type: "Integer", value: parseInt(digits.join(''), 10) }; }
 

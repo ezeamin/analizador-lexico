@@ -41,7 +41,7 @@ export const generateTree = (program) => {
           elements.nodes.push({
             id: nodeId,
             data: { label: variable.name },
-            type: "output",
+            type: 'output',
             position: { x: 0, y: 0 }, // Set position as needed
           });
         }
@@ -50,13 +50,15 @@ export const generateTree = (program) => {
           data: { label: node.type },
           position: { x: 0, y: 0 }, // Set position as needed
         });
-        elements.edges.push({
-          id: `${elements.nodes[elements.nodes.length - 1].id}_to_${
-            elements.nodes[elements.nodes.length - 2].id
-          }`,
-          source: elements.nodes[elements.nodes.length - 1].id,
-          target: elements.nodes[elements.nodes.length - 2].id,
-        });
+        for (const index in node.variables) {
+          elements.edges.push({
+            id: `${elements.nodes[elements.nodes.length - 1].id}_to_${
+              elements.nodes[elements.nodes.length - 2 - index].id
+            }`,
+            source: elements.nodes[elements.nodes.length - 1].id,
+            target: elements.nodes[elements.nodes.length - 2 - index].id,
+          });
+        }
         break;
 
       case 'Input':
@@ -65,7 +67,7 @@ export const generateTree = (program) => {
         elements.nodes.push({
           id: inputNodeId,
           data: { label: node.variable.name },
-          type: "output",
+          type: 'output',
           position: { x: 0, y: 0 }, // Set position as needed
         });
         elements.nodes.push({
@@ -90,7 +92,7 @@ export const generateTree = (program) => {
         elements.nodes.push({
           id: assignmentNodeId,
           data: { label: node.variable.name },
-          type: "output",
+          type: 'output',
           position: { x: 0, y: 0 }, // Set position as needed
         });
 
@@ -141,13 +143,15 @@ export const generateTree = (program) => {
         for (let i = 0; i < node.parameters.length; i++) {
           elements.edges.push({
             id: `${outputNodeId}_to_${
-              elements.nodes[elements.nodes.length - 1 - node.parameters.length + i]
-                .id
+              elements.nodes[
+                elements.nodes.length - 1 - node.parameters.length + i
+              ].id
             }`,
             source: outputNodeId,
             target:
-              elements.nodes[elements.nodes.length - 1 - node.parameters.length + i]
-                .id,
+              elements.nodes[
+                elements.nodes.length - 1 - node.parameters.length + i
+              ].id,
           });
         }
         break;
@@ -190,7 +194,7 @@ export const generateTree = (program) => {
         elements.nodes.push({
           id: leafNodeId,
           data: { label: node.name || node.value },
-          type: "output",
+          type: 'output',
           position: { x: 0, y: 0 }, // Set position as needed
         });
         break;
