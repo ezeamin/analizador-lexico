@@ -28,7 +28,7 @@ export const lexicalAnalysis = (text) => {
     console.log('input:', text);
     console.error(error);
 
-    throw new Error(error.message);
+    throw new Error(`Error Léxico - ${error.message}`);
   }
 
   return { lexicalAnalysis: result, text: highlightedText };

@@ -3,7 +3,6 @@ import express from 'express';
 import {
   getTable,
   postAnalyze,
-  postSyntaxAnalyze,
 } from '../controllers/controllers.js';
 
 import validateBody from '../middlewares/validateBody.js';

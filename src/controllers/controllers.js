@@ -41,7 +41,7 @@ export const postAnalyze = async (req, res) => {
       const found = e.found;
 
       res.status(400).json({
-        error: `(${line}:${column}) Se esperaba "${expected}" pero se encontró "${found}"`,
+        error: `Error Sintáctico - (${line}:${column}) Se esperaba "${expected}" pero se encontró "${found}"`,
       });
       return;
     }
