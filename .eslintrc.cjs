@@ -13,4 +13,5 @@ module.exports = {
     'no-continue': 'off',
     'no-console': 'off',
   },
+  exclude: ['./src/grammar.js'],
 };

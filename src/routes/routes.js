@@ -1,6 +1,9 @@
 import express from 'express';
 
-import { getTable, postAnalyze } from '../controllers/controllers.js';
+import {
+  getTable,
+  postAnalyze,
+} from '../controllers/controllers.js';
 
 import validateBody from '../middlewares/validateBody.js';
 
