@@ -20,7 +20,7 @@ export const generateTree = (program) => {
         elements.nodes.push({
           id: 'root',
           data: { label: node.type },
-          position: { x: 0, y: 0 }, // Set position as needed
+          position: { x: 0, y: 0 },
         });
         for (const stmt of node.body) {
           processNode(stmt);
@@ -42,13 +42,13 @@ export const generateTree = (program) => {
             id: nodeId,
             data: { label: variable.name },
             type: 'output',
-            position: { x: 0, y: 0 }, // Set position as needed
+            position: { x: 0, y: 0 },
           });
         }
         elements.nodes.push({
           id: generateNodeId(),
           data: { label: node.type },
-          position: { x: 0, y: 0 }, // Set position as needed
+          position: { x: 0, y: 0 },
         });
         for (const index in node.variables) {
           elements.edges.push({
@@ -68,12 +68,12 @@ export const generateTree = (program) => {
           id: inputNodeId,
           data: { label: node.variable.name },
           type: 'output',
-          position: { x: 0, y: 0 }, // Set position as needed
+          position: { x: 0, y: 0 },
         });
         elements.nodes.push({
           id: generateNodeId(),
           data: { label: node.type },
-          position: { x: 0, y: 0 }, // Set position as needed
+          position: { x: 0, y: 0 },
         });
         elements.edges.push({
           id: `${elements.nodes[elements.nodes.length - 1].id}_to_${
@@ -85,42 +85,39 @@ export const generateTree = (program) => {
         break;
 
       case 'Assignment':
-        // Create a node for assignment
-        const assignmentNodeId = generateNodeId();
-
         // Left side node
+        const leftNodeId = generateNodeId();
         elements.nodes.push({
-          id: assignmentNodeId,
+          id: leftNodeId,
           data: { label: node.variable.name },
           type: 'output',
-          position: { x: 0, y: 0 }, // Set position as needed
+          position: { x: 0, y: 0 },
         });
 
         // Process the expression node
         processNode(node.expression);
 
+        const assignmentNodeId = generateNodeId();
         elements.nodes.push({
-          id: generateNodeId(),
+          id: assignmentNodeId,
           data: { label: node.type }, // "Assignment" node
-          position: { x: 0, y: 0 }, // Set position as needed
+          position: { x: 0, y: 0 },
         });
 
         // Connect the left assignment node to the assignment node
         elements.edges.push({
-          id: `${elements.nodes[elements.nodes.length - 1].id}_to_${
-            elements.nodes[elements.nodes.length - 5].id
-          }`,
-          source: elements.nodes[elements.nodes.length - 1].id,
-          target: elements.nodes[elements.nodes.length - 5].id,
+          id: `${assignmentNodeId}_to_${leftNodeId}`,
+          source: assignmentNodeId,
+          target: leftNodeId,
         });
 
         // Connect the expression node to the Assignment node
         elements.edges.push({
-          id: `${elements.nodes[elements.nodes.length - 1].id}_to_${
-            elements.nodes[elements.nodes.length - 4].id
+          id: `${assignmentNodeId}_to_${
+            elements.nodes[elements.nodes.length - 2].id
           }`,
-          source: elements.nodes[elements.nodes.length - 1].id,
-          target: elements.nodes[elements.nodes.length - 4].id,
+          source: assignmentNodeId,
+          target: elements.nodes[elements.nodes.length - 2].id,
         });
         break;
 
@@ -136,7 +133,7 @@ export const generateTree = (program) => {
         elements.nodes.push({
           id: outputNodeId,
           data: { label: node.type },
-          position: { x: 0, y: 0 }, // Set position as needed
+          position: { x: 0, y: 0 },
         });
 
         // Create edges from the output node to each parameter node
@@ -162,12 +159,11 @@ export const generateTree = (program) => {
         elements.nodes.push({
           id: binaryOpNodeId,
           data: { label: node.operator },
-          position: { x: 0, y: 0 }, // Set position as needed
+          position: { x: 0, y: 0 },
         });
 
         // Process left and right nodes
         processNode(node.left);
-        processNode(node.right);
 
         // Create edges from the binary operation node to left and right nodes
         elements.edges.push({
@@ -177,13 +173,149 @@ export const generateTree = (program) => {
           source: binaryOpNodeId,
           target: elements.nodes[elements.nodes.length - 1].id,
         });
+
+        processNode(node.right);
+
         elements.edges.push({
           id: `${binaryOpNodeId}_to_${
-            elements.nodes[elements.nodes.length - 2].id
+            elements.nodes[elements.nodes.length - 1].id
           }`,
           source: binaryOpNodeId,
-          target: elements.nodes[elements.nodes.length - 2].id,
+          target: elements.nodes[elements.nodes.length - 1].id,
         });
+
+        // Bring the if root node to the end of the array
+        const opRootIndex = elements.nodes.findIndex(
+          (el) => el.id === binaryOpNodeId,
+        );
+        const opRootNode = elements.nodes.splice(opRootIndex, 1);
+        elements.nodes.push(opRootNode[0]);
+        break;
+
+      case 'IfStatement':
+        // Create a node for if statement
+        const ifNodeId = generateNodeId();
+        elements.nodes.push({
+          id: ifNodeId,
+          data: { label: 'If' },
+          position: { x: 0, y: 0 },
+        });
+
+        // Create a node for the condition
+        const conditionNodeId = generateNodeId();
+        elements.nodes.push({
+          id: conditionNodeId,
+          data: { label: node.condition.operator },
+          position: { x: 0, y: 0 },
+        });
+
+        // Create an Condition for the condition
+        const ifConditionNodeId = generateNodeId();
+        elements.nodes.push({
+          id: ifConditionNodeId,
+          data: { label: 'Condition' },
+          position: { x: 0, y: 0 },
+        });
+
+        // Create an edge from the condition node to the root node
+        elements.edges.push({
+          id: `${ifNodeId}_to_${ifConditionNodeId}`,
+          source: ifNodeId,
+          target: ifConditionNodeId,
+        });
+        elements.edges.push({
+          id: `${ifConditionNodeId}_to_${conditionNodeId}`,
+          source: ifConditionNodeId,
+          target: conditionNodeId,
+        });
+
+        // Process left and right nodes of condition
+        processNode(node.condition.left);
+
+        // Create edges from the condition node to left and right nodes
+        elements.edges.push({
+          id: `${conditionNodeId}_to_${
+            elements.nodes[elements.nodes.length - 1].id
+          }`,
+          source: conditionNodeId,
+          target: elements.nodes[elements.nodes.length - 1].id,
+        });
+
+        
+        processNode(node.condition.right);
+
+        elements.edges.push({
+          id: `${conditionNodeId}_to_${
+            elements.nodes[elements.nodes.length - 1].id
+          }`,
+          source: conditionNodeId,
+          target: elements.nodes[elements.nodes.length - 1].id,
+        });
+
+        // Create "IfBody" node
+        const ifBodyNodeId = generateNodeId();
+        elements.nodes.push({
+          id: ifBodyNodeId,
+          data: { label: 'Body' },
+          position: { x: 0, y: 0 },
+        });
+
+        // Process the body of the if statement
+        for (const nodeStmt of node.body) {
+          processNode(nodeStmt);
+          elements.edges.push({
+            id: `${ifBodyNodeId}_to_${
+              elements.nodes[elements.nodes.length - 1].id
+            }`,
+            source: ifBodyNodeId,
+            target: elements.nodes[elements.nodes.length - 1].id,
+          });
+        }
+
+        // Create an edge from the body node to the root node
+        elements.edges.push({
+          id: `${ifNodeId}_to_${ifBodyNodeId}`,
+          source: ifNodeId,
+          target: ifBodyNodeId,
+        });
+
+        // Process the else body if it exists
+        if (node.else.length > 0) {
+          // Create Else node
+          const ifElseNodeId = generateNodeId();
+          elements.nodes.push({
+            id: ifElseNodeId,
+            data: { label: 'Else' },
+            position: { x: 0, y: 0 },
+          });
+
+          // Create an edge from the else node to the root node
+          elements.edges.push({
+            id: `${ifNodeId}_to_${ifElseNodeId}`,
+            source: ifNodeId,
+            target: ifElseNodeId,
+          });
+
+          for (const nodeElse of node.else) {
+            processNode(nodeElse);
+
+            elements.edges.push({
+              id: `${ifElseNodeId}_to_${
+                elements.nodes[elements.nodes.length - 1].id
+              }`,
+              source: ifElseNodeId,
+              target: elements.nodes[elements.nodes.length - 1].id,
+            });
+          }
+        }
+
+        // Bring the if root node to the end of the array
+        const ifRootIndex = elements.nodes.findIndex(
+          (el) => el.id === ifNodeId,
+        );
+        const ifRootNode = elements.nodes.splice(ifRootIndex, 1);
+        elements.nodes.push(ifRootNode[0]);
+
         break;
 
       case 'Identifier':
@@ -195,7 +327,7 @@ export const generateTree = (program) => {
           id: leafNodeId,
           data: { label: node.name || node.value },
           type: 'output',
-          position: { x: 0, y: 0 }, // Set position as needed
+          position: { x: 0, y: 0 },
         });
         break;
 

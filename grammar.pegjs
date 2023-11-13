@@ -115,7 +115,7 @@ logicalExpression
     }
 
 bitwiseExpression
-  = left:arithmeticExpression _ otherTerms:(_ op:bitwiseOperator _ right:arithmeticExpression {
+  = left:additiveExpression _ otherTerms:(_ op:bitwiseOperator _ right:additiveExpression {
       return { left, operator: op, right };
     })* {
       return otherTerms.reduce(function (acc, term) {
@@ -123,8 +123,17 @@ bitwiseExpression
       }, left);
     }
 
-arithmeticExpression
-  = left:primary _ otherTerms:(_ op:arithmeticOperator _ right:primary {
+additiveExpression
+  = left:otherArithmeticExpression _ otherTerms:(_ op:additiveOperator _ right:otherArithmeticExpression {
+      return { left, operator: op, right };
+    })* {
+      return otherTerms.reduce(function (acc, term) {
+        return createBinaryOperation(acc, term.operator, term.right);
+      }, left);
+    }
+
+otherArithmeticExpression
+  = left:primary _ otherTerms:(_ op:otherArithmeticOperator _ right:primary {
       return { left, operator: op, right };
     })* {
       return otherTerms.reduce(function (acc, term) {
@@ -146,8 +155,11 @@ bitwiseOperator
 logicalOperator
   = "&&" / "||"
 
-arithmeticOperator
-  = "+" / "*" / "-" / "/"
+otherArithmeticOperator
+  = "*" / "/"
+
+additiveOperator
+  = "+" / "-"
   
 type
   = "int" / "float" / "char"

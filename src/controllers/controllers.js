@@ -58,7 +58,7 @@ export const postSyntaxAnalyze = async (req, res) => {
     const data = parse(text);
     const treeData = generateTree(data);
 
-    res.json({ tree: treeData, raw: data });
+    res.json({ tree: treeData });
   } catch (e) {
     console.log('input:', text);
     console.error(e);
