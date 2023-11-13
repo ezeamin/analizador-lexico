@@ -1,9 +1,8 @@
 import table from '../dictionary.js';
 
-import { Lexer } from '../models/Lexer.js';
-
 import { parse } from '../grammar.js';
 import { generateTree } from '../utilities/generateTree.js';
+import { lexicalAnalysis } from '../utilities/lexicalAnalysis.js';
 
 // ---------------------------------------
 // POST
@@ -14,51 +13,21 @@ export const postAnalyze = async (req, res) => {
     body: { text },
   } = req;
 
-  const lexer = new Lexer(text);
+  let lexicalData;
 
-  const result = [];
-  let highlightedText = '';
-
+  // 1st: Lexical analysis
   try {
-    let token = lexer.getNextToken();
-    while (token.type !== 'EOF') {
-      // Valid token - save it
-      if (token.type !== 'NEW_LINE' && token.type !== 'SPACE') {
-        result.push(token);
-      }
-
-      // Only for highlighting purposes
-      if (token.type === 'SPACE') highlightedText += '&nbsp;';
-      else {
-        highlightedText += `<span class="highlighted-token color-${token.color}" title="Token: ${token.type}">${token.value}</span>`;
-      }
-
-      if (token.type === 'NEW_LINE') highlightedText += '<br />';
-
-      token = lexer.getNextToken();
-    }
+    lexicalData = lexicalAnalysis(text);
   } catch (error) {
-    console.log('input:', text);
-    console.error(error);
-
     return res.status(400).json({ error: error.message });
   }
 
-  return res.json({ data: result, text: highlightedText });
-};
-
-export const postSyntaxAnalyze = async (req, res) => {
-  const {
-    body: { text },
-  } = req;
-
-  // TODO: Add symbols analysis here
-
+  // 2nd: Syntax analysis
   try {
     const data = parse(text);
     const treeData = generateTree(data);
 
-    res.json({ tree: treeData });
+    res.json({ ...lexicalData, tree: treeData });
   } catch (e) {
     console.log('input:', text);
     console.error(e);

@@ -12,7 +12,6 @@ const router = express.Router();
 
 // POST ---------------------------
 router.post('/analyze', validateBody, postAnalyze);
-router.post('/syntax-analyze', validateBody, postSyntaxAnalyze);
 
 router.get('/table', getTable);
 
