@@ -171,9 +171,18 @@ string
   = "\"" value:$([^"]*) "\"" { return { type: "String", value: value }; }
 
 identifier
-  = name:$(letter (letter / digit / "_")*) !"int" {
+  = !reservedWords name:identifierName  {
       return { type: "Identifier", name: name };
     }
+    
+identifierName 
+ = $(letter (letter / digit / "_")*) 
+ 
+reservedWords
+ = (type / "si" / "sino" / "mientras" / "terminar" / "imprimir" / "leer")
+    
+letterOrDigit
+  = letter / digit
 
 letter
   = [a-zA-Z]
