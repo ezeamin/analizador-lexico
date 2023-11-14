@@ -67,7 +67,14 @@ export class Lexer {
 
         // Check for ".(something_not_a_number)"
         if (!Analyzer.isDigit(char)) {
-          throw new Error(`Caracter inválido: ${char}`);
+          const lineNumber =
+            this.input.split('\n').findIndex((el) => el.includes(char)) + 1;
+          const columnNumber =
+            this.position - this.input.lastIndexOf('\n', this.position);
+
+          throw new Error(
+            `(${lineNumber},${columnNumber}) Caracter inválido: ${char}`,
+          );
         }
 
         while (Analyzer.isDigit(char)) {
@@ -85,12 +92,17 @@ export class Lexer {
     const value = char;
 
     if (!symbol) {
-      throw new Error(`Caracter inválido: ${char}`);
+      const lineNumber =
+        this.input.split('\n').findIndex((el) => el.includes(char)) + 1;
+      const columnNumber =
+        this.position - this.input.lastIndexOf('\n', this.position);
+
+      throw new Error(
+        `(${lineNumber},${columnNumber}) Caracter inválido: ${char}`,
+      );
     }
 
     this.position += 1;
     return new Token(symbol.value, value, symbol.color);
-
-    // return new Token('EOF', null);
   }
 }

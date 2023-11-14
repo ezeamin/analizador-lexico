@@ -1,6 +1,6 @@
 import { Lexer } from '../models/Lexer.js';
 
-export const lexicalAnalysis = (text) => {
+export const lexicalAnalysis = (text, res) => {
   const lexer = new Lexer(text);
 
   const result = [];
@@ -28,7 +28,9 @@ export const lexicalAnalysis = (text) => {
     console.log('input:', text);
     console.error(error);
 
-    throw new Error(`Error Léxico - ${error.message}`);
+    res.status(400).json({ error: error.message, type: "lexico" })
+
+    throw new Error(error);
   }
 
   return { lexicalAnalysis: result, text: highlightedText };
