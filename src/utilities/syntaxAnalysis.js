@@ -1,5 +1,7 @@
-import { parse } from "../grammar.js";
-import { generateTree } from "./generateTree.js";
+import { parse } from '../grammar.js';
+
+import { generateTree } from './generateTree.js';
+import { processSyntaxError } from './processSyntaxError.js';
 
 export const syntaxAnalysis = (res, text, lexicalData) => {
   try {
@@ -11,31 +13,6 @@ export const syntaxAnalysis = (res, text, lexicalData) => {
     console.log('input:', text);
     console.error(e);
 
-    // TODO: Improve "found" to include whole word (regex?)
-    if (e.expected) {
-      const expectedElements = e.expected.filter((el) => el.type === 'literal');
-      const expected = expectedElements.map((el) => el.text).join('", "');
-      const line = e.location.start.line;
-      const column = e.location.start.column;
-      const found = e.found;
-
-      if (!found) {
-        res.status(400).json({
-          error: `(${line}:${column}) Se esperaba "${expected}"`,
-          type: 'sintactico',
-        });
-        return;
-      }
-
-      res.status(400).json({
-        error: `(${line}:${column}) Se esperaba "${expected}" pero se encontró "${found}"`,
-        type: 'sintactico',
-      });
-      return;
-    }
-
-    res.status(500).json({
-      error: e.message,
-    });
+    processSyntaxError(res, e);
   }
 };

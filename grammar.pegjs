@@ -10,7 +10,7 @@
 }
 
 start
-  = "programa" _ name:identifier "(" _ params:paramList* _ ")" _ "{" _ stmts:statement* _ finish:finishStatement _ "}" _ {
+  = "programa" (" " / "\n") _ name:identifier "(" _ params:paramList* _ ")" _ "{" _ stmts:statement* _ finish:finishStatement _ "}" _ {
       return {
         type: "Program",
         name: name,
