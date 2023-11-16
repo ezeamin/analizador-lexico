@@ -15,8 +15,6 @@ export const generateTree = (program) => {
   const processNode = (node) => {
     switch (node.type) {
       case 'Program':
-        // The program node doesn't have visual representation
-        // Process its body instead
         elements.nodes.push({
           id: 'root',
           data: { label: node.type },
@@ -25,10 +23,8 @@ export const generateTree = (program) => {
         for (const stmt of node.body) {
           processNode(stmt);
           elements.edges.push({
-            id: `${elements.nodes[0].id}_to_${
-              elements.nodes[elements.nodes.length - 1].id
-            }`,
-            source: elements.nodes[0].id,
+            id: `root_to_${elements.nodes[elements.nodes.length - 1].id}`,
+            source: 'root',
             target: elements.nodes[elements.nodes.length - 1].id,
           });
         }
@@ -50,6 +46,7 @@ export const generateTree = (program) => {
           data: { label: node.type },
           position: { x: 0, y: 0 },
         });
+        
         for (const index in node.variables) {
           elements.edges.push({
             id: `${elements.nodes[elements.nodes.length - 1].id}_to_${
@@ -241,7 +238,6 @@ export const generateTree = (program) => {
           target: elements.nodes[elements.nodes.length - 1].id,
         });
 
-        
         processNode(node.condition.right);
 
         elements.edges.push({
@@ -318,6 +314,89 @@ export const generateTree = (program) => {
 
         break;
 
+      case 'DeclarationAndAssignment':
+        node.values.forEach((value, index) => {
+          const declarationId = generateNodeId();
+          elements.nodes.push({
+            id: declarationId,
+            data: { label: 'Declaration' },
+            position: { x: 0, y: 0 },
+          });
+          const variableId = generateNodeId();
+          elements.nodes.push({
+            id: variableId,
+            data: { label: value.variable.name },
+            position: { x: 0, y: 0 },
+          });
+
+          // Connect declaration node to variable node
+          elements.edges.push({
+            id: `${declarationId}_to_${variableId}`,
+            source: declarationId,
+            target: variableId,
+          });
+
+          //  Connect the root node to the declaration node
+          elements.edges.push({
+            id: `root_to_${declarationId}`,
+            source: 'root',
+            target: declarationId,
+          });
+
+          // Create assignment node
+
+          const assignmentId = generateNodeId();
+          elements.nodes.push({
+            id: assignmentId,
+            data: { label: 'Assignment' },
+            position: { x: 0, y: 0 },
+          });
+
+          // Create a new node for the variable
+          const variable2Id = generateNodeId();
+          elements.nodes.push({
+            id: variable2Id,
+            data: { label: value.variable.name },
+            position: { x: 0, y: 0 },
+          });
+
+          // Connect the assignment node to the variable node
+          elements.edges.push({
+            id: `${assignmentId}_to_${variable2Id}`,
+            source: assignmentId,
+            target: variable2Id,
+          });
+
+          // process expression node
+          processNode(value.expression);
+
+          // Connect the assignment node to the expression node
+          elements.edges.push({
+            id: `${assignmentId}_to_${
+              elements.nodes[elements.nodes.length - 1].id
+            }`,
+            source: assignmentId,
+            target: elements.nodes[elements.nodes.length - 1].id,
+          });
+
+          if (index === node.values.length - 1) {
+            // move assignment node to the end of the array
+            const assignmentIndex = elements.nodes.findIndex(
+              (el) => el.id === assignmentId,
+            );
+            const assignmentNode = elements.nodes.splice(assignmentIndex, 1);
+            elements.nodes.push(assignmentNode[0]);
+          } else {
+            // Connect the root node to the assignment node
+            elements.edges.push({
+              id: `root_to_${assignmentId}`,
+              source: 'root',
+              target: assignmentId,
+            });
+          }
+        });
+        break;
+
       case 'Identifier':
       case 'String':
       case 'Integer':
@@ -332,7 +411,6 @@ export const generateTree = (program) => {
         break;
 
       default:
-        // Handle other node types if needed
         break;
     }
   };

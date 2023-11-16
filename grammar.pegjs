@@ -32,6 +32,7 @@ finishStatement
 
 statement
   = declaration
+  / declarationAndAssignment
   / input
   / output
   / assignment
@@ -50,6 +51,28 @@ elseStatement
   = _ "sino" _ "{" _ body:statement* _ "}" {
     { return body; }
   }
+  
+declarationAndAssignment
+  = _ varType:type " " _ vars:decAndAssList ";" {
+      return {
+        type: "DeclarationAndAssignment",
+        values: vars,
+      };
+  }
+  
+decAndAssList
+  = variable:identifier _ "=" _ expr:expression _ otherVars:("," _ id:identifier _ "=" _ otherExpr:expression {
+    return {
+        variable: id,
+        expression: otherExpr
+    }; 
+  })* {
+      const thisVar = {
+        variable: variable,
+        expression: expr
+    }
+      return [thisVar].concat(otherVars);
+    }
 
 declaration
   = _ varType:type _ vars:variableDeclarationList ";" {
