@@ -8,7 +8,7 @@ export const syntaxAnalysis = (res, text, lexicalData) => {
     const data = parse(text);
     const treeData = generateTree(data);
 
-    res.json({ ...lexicalData, tree: treeData });
+    res.json({ ...lexicalData, tree: treeData, raw: data });
   } catch (e) {
     console.log('input:', text);
     console.error(e);
